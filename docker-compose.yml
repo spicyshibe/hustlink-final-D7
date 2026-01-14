@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  # --- 1. DATABASE SERVICE ---
+  db_service:
+    image: mysql:8.0
+    container_name: db_${GROUP_NAME}
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+      MYSQL_ROOT_PASSWORD: rootpassword
+    # volumes
+    # Network
+
+  # --- 2. APP SERVICE ---
+  app_service:
+    build: ./app
+    container_name: app_${GROUP_NAME}
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      - DB_HOST=db_service
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - APP_PORT=3000
+    depends_on:
+      - db_service
+    # Network
+
+  # --- 3. NGINX SERVICE ---
+  nginx_service:
+    image: nginx:alpine
+    container_name: nginx_${GROUP_NAME}
+    restart: always
+    ports:
+      - "${APP_PORT}:80"
+    depends_on:
+      - app_service
+    # Network
+    # volumes
+
+#--- VOLUMES AND NETWORKS ---
+# tambahkan bagian volumes dan networks di sini
